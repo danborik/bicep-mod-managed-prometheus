@@ -10,8 +10,7 @@ permissions:
 
 env:
     ACR_NAME: acrcitinfrbicepmodules.azurecr.io
-    MODULE_NAME: <module-name>  # Replace with the actual module name
-
+    MODULE_NAME: managed-prometheus
 jobs:
     publish:
         runs-on: ubuntu-latest
