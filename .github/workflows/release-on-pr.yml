@@ -1,0 +1,36 @@
+name: Create Release on PR Merge
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+    paths:
+      - '**/*.bicep'
+
+jobs:
+  create-release:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Fetch all tags
+        run: git fetch --tags
+
+      - name: Get Latest Tag
+        id: get_tag
+        run: |
+          TAG_NAME=$(git describe --tags `git rev-list --tags --max-count=1`)
+          echo "::set-output name=tag::$TAG_NAME"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: false
+          token: ${{ secrets.PAT }}
+          tag_name: ${{ steps.get_tag.outputs.tag }}
+          name: Release ${{ steps.get_tag.outputs.tag }}
+          body: |
+            Release created for tag ${{ steps.get_tag.outputs.tag }}

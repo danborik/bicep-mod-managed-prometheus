@@ -1,0 +1,39 @@
+name: Publish Bicep Module to ACR
+
+on:
+    release:
+        types: [published]
+
+permissions:
+    contents: read
+    id-token: write
+
+env:
+    ACR_NAME: acrcitinfrbicepmodules.azurecr.io
+    MODULE_NAME: <module-name>  # Replace with the actual module name
+
+jobs:
+    publish:
+        runs-on: ubuntu-latest
+        name: Publish Bicep Module to ACR
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Azure login
+              uses: azure/login@v2
+              with:
+                creds: ${{ secrets.AZURE_SPN_CRED }}
+
+            - name: Login to ACR
+              run: |
+                az acr login --name $ACR_NAME
+
+            - name: Publish module
+              run: |
+                # Extract the version from the release tag
+                VERSION=${{ github.event.release.tag_name }}
+
+                echo "Version $VERSION of module $MODULE_NAME will be published to ACR."
+                az bicep publish --file main.bicep --target br:${{ env.ACR_NAME }}/${{ env.MODULE_NAME }}:$VERSION
